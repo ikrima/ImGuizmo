@@ -19,6 +19,8 @@ namespace ImSequencer
 
     struct SequenceInterface
     {
+       virtual ~SequenceInterface() = default;
+
         bool focused = false;
         virtual int GetFrameMin() const = 0;
         virtual int GetFrameMax() const = 0;
