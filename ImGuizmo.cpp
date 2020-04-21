@@ -821,15 +821,13 @@ namespace ImGuizmo
 
    void BeginFrame()
    {
-      ImGuiIO& io = ImGui::GetIO();
-
       const ImU32 flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoBringToFrontOnFocus;
-    
+
 #ifdef IMGUI_HAS_VIEWPORT
       ImGui::SetNextWindowSize(ImGui::GetMainViewport()->Size);
       ImGui::SetNextWindowPos(ImGui::GetMainViewport()->Pos);
 #else
-      ImGui::SetNextWindowSize(io.DisplaySize);
+      ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
       ImGui::SetNextWindowPos(ImVec2(0, 0));
 #endif
 
@@ -862,13 +860,6 @@ namespace ImGuizmo
           gContext.mbUsing = false;
           gContext.mbUsingBounds = false;
       }
-   }
-
-   static float GetUniform(const vec_t& position, const matrix_t& mat)
-   {
-      vec_t trf = makeVect(position.x, position.y, position.z, 1.f);
-      trf.Transform(mat);
-      return trf.w;
    }
 
    static void ComputeContext(const float *view, const float *projection, float *matrix, MODE mode)
@@ -2014,7 +2005,6 @@ namespace ImGuizmo
    {
       matrix_t viewInverse;
       viewInverse.Inverse(*(matrix_t*)view);
-      const matrix_t& model = *(matrix_t*)matrix;
       matrix_t res = *(matrix_t*)matrix * *(matrix_t*)view * *(matrix_t*)projection;
       matrix_t modelView = *(matrix_t*)matrix * *(matrix_t*)view;
 
@@ -2310,4 +2300,3 @@ namespace ImGuizmo
       }
    }
 };
-
