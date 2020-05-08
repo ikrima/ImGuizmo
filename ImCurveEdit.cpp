@@ -7,10 +7,6 @@
 #include <set>
 #include <vector>
 
-#if !defined(_MSC_VER)
-#define _malloca(x) alloca(x)
-#endif
-
 namespace ImCurveEdit
 {
 
@@ -179,7 +175,7 @@ namespace ImCurveEdit
 
       int localOverCurve = -1;
       // make sure highlighted curve is rendered last
-      int *curvesIndex = (int*)_malloca(sizeof(int) * curveCount);
+      int *curvesIndex = (int*)alloca(sizeof(int) * curveCount);
       for (size_t c = 0; c < curveCount; c++)
           curvesIndex[c] = int(c);
       int highLightedCurveIndex = -1;
