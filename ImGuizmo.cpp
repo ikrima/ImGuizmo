@@ -678,8 +678,8 @@ namespace ImGuizmo
 
    static Context gContext;
 
-   static const float angleLimit = 0.96f;
-   static const float planeLimit = 0.2f;
+   //static constexpr float angleLimit = 0.96f;
+   //static constexpr float planeLimit = 0.2f;
 
    static const vec_t directionUnary[3] = { makeVect(1.f, 0.f, 0.f), makeVect(0.f, 1.f, 0.f), makeVect(0.f, 0.f, 1.f) };
    static const ImU32 directionColor[3] = { 0xFF0000AA, 0xFF00AA00, 0xFFAA0000 };
@@ -887,6 +887,7 @@ namespace ImGuizmo
       case SCALE:       return GetScaleType()      != NONE || IsUsing();
       case ROTATE:      return GetRotateType()     != NONE || IsUsing();
       case TRANSLATE:   return GetMoveType(NULL)   != NONE || IsUsing();
+      case BOUNDS: return false;
       }
       return false;
    }
@@ -2209,6 +2210,7 @@ namespace ImGuizmo
 
          matrix_t res = *(matrix_t*)matrix * *(matrix_t*)view * *(matrix_t*)projection;
          matrix_t modelView = *(matrix_t*)matrix * *(matrix_t*)view;
+         ES2UNUSED(modelView);
 
          for (int iFace = 0; iFace < 6; iFace++)
          {
@@ -2409,7 +2411,7 @@ namespace ImGuizmo
                                           directionUnary[normalIndex] + directionUnary[perpXIndex] - directionUnary[perpYIndex],
                                           directionUnary[normalIndex] - directionUnary[perpXIndex] - directionUnary[perpYIndex],
                                           directionUnary[normalIndex] - directionUnary[perpXIndex] + directionUnary[perpYIndex] };
-
+            ES2UNUSED(faceCoords);
             // plan local space
             const vec_t n = directionUnary[normalIndex] * invert;
             vec_t viewSpaceNormal = n;
