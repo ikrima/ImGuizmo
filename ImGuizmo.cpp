@@ -28,8 +28,9 @@
 #include "ImGuizmo.h"
 #if !defined(_WIN32) 
 #define _malloca(x) alloca(x)
-#endif
+#else
 #include <malloc.h>
+#endif
 
 // includes patches for multiview from
 // https://github.com/CedricGuillemet/ImGuizmo/issues/15
@@ -39,7 +40,7 @@ namespace ImGuizmo
    static const float ZPI = 3.14159265358979323846f;
    static const float RAD2DEG = (180.f / ZPI);
    static const float DEG2RAD = (ZPI / 180.f);
-   static const float gGizmoSizeClipSpace = 0.1f;
+	static float gGizmoSizeClipSpace = 0.1f;
    const float screenRotateSize = 0.06f;
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -674,6 +675,7 @@ namespace ImGuizmo
 
       int mActualID = -1;
       int mEditingID = -1;
+      OPERATION mOperation = OPERATION(-1);
    };
 
    static Context gContext;
@@ -839,14 +841,14 @@ namespace ImGuizmo
       gContext.mDisplayRatio = width / height;
    }
 
-   IMGUI_API void SetOrthographic(bool isOrthographic)
+   void SetOrthographic(bool isOrthographic)
    {
       gContext.mIsOrthographic = isOrthographic;
    }
 
-   void SetDrawlist()
+   void SetDrawlist(ImDrawList* drawlist)
    {
-      gContext.mDrawList = ImGui::GetWindowDrawList();
+      gContext.mDrawList = drawlist ? drawlist : ImGui::GetWindowDrawList();
 }
 
    void BeginFrame()
@@ -879,7 +881,9 @@ namespace ImGuizmo
 
    bool IsOver()
    {
-      return (GetMoveType(NULL) != NONE) || GetRotateType() != NONE || GetScaleType() != NONE || IsUsing();
+      return (gContext.mOperation == TRANSLATE && GetMoveType(NULL) != NONE) ||
+         (gContext.mOperation == ROTATE && GetRotateType() != NONE) ||
+         (gContext.mOperation == SCALE && GetScaleType() != NONE) || IsUsing();
    }
 
    bool IsOver(OPERATION op) {
@@ -1061,7 +1065,7 @@ namespace ImGuizmo
          *value = *value - modulo + snap * ((*value < 0.f) ? -1.f : 1.f);
       }
    }
-   static void ComputeSnap(vec_t& value, float* snap)
+   static void ComputeSnap(vec_t& value, const float* snap)
    {
       for (int i = 0; i < 3; i++)
       {
@@ -1329,7 +1333,7 @@ namespace ImGuizmo
       return false;
    }
 
-   static void HandleAndDrawLocalBounds(float* bounds, matrix_t* matrix, float* snapValues, OPERATION operation)
+   static void HandleAndDrawLocalBounds(const float* bounds, matrix_t* matrix, const float* snapValues, OPERATION operation)
    {
       ImGuiIO& io = ImGui::GetIO();
       ImDrawList* drawList = gContext.mDrawList;
@@ -1718,7 +1722,7 @@ namespace ImGuizmo
       return type;
    }
 
-   static bool HandleTranslation(float* matrix, float* deltaMatrix, int& type, float* snap)
+   static bool HandleTranslation(float* matrix, float* deltaMatrix, int& type, const float* snap)
    {
       ImGuiIO& io = ImGui::GetIO();
       bool applyRotationLocaly = gContext.mMode == LOCAL || type == MOVE_SCREEN;
@@ -1827,7 +1831,7 @@ namespace ImGuizmo
       return modified;
    }
 
-   static bool HandleScale(float* matrix, float* deltaMatrix, int& type, float* snap)
+   static bool HandleScale(float* matrix, float* deltaMatrix, int& type, const float* snap)
    {
       ImGuiIO& io = ImGui::GetIO();
       bool modified = false;
@@ -1924,7 +1928,7 @@ namespace ImGuizmo
       return modified;
    }
 
-   static bool HandleRotation(float* matrix, float* deltaMatrix, int& type, float* snap)
+   static bool HandleRotation(float* matrix, float* deltaMatrix, int& type, const float* snap)
    {
       ImGuiIO& io = ImGui::GetIO();
       bool applyRotationLocaly = gContext.mMode == LOCAL;
@@ -2075,7 +2079,7 @@ namespace ImGuizmo
       gContext.mActualID = id;
    }
 
-   bool Manipulate(const float* view, const float* projection, OPERATION operation, MODE mode, float* matrix, float* deltaMatrix, float* snap, float* localBounds, float* boundsSnap)
+   bool Manipulate(const float* view, const float* projection, OPERATION operation, MODE mode, float* matrix, float* deltaMatrix, const float* snap, const float* localBounds, const float* boundsSnap)
    {
       ComputeContext(view, projection, matrix, mode);
 
@@ -2122,6 +2126,7 @@ namespace ImGuizmo
          HandleAndDrawLocalBounds(localBounds, (matrix_t*)matrix, boundsSnap, operation);
       }
 
+      gContext.mOperation = operation;
       if (!gContext.mbUsingBounds)
       {
          switch (operation)
@@ -2140,6 +2145,11 @@ namespace ImGuizmo
          }
       }
       return manipulated;
+   }
+
+   void SetGizmoSizeClipSpace(float value)
+   {
+       gGizmoSizeClipSpace = value;
    }
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2210,7 +2220,7 @@ namespace ImGuizmo
 
          matrix_t res = *(matrix_t*)matrix * *(matrix_t*)view * *(matrix_t*)projection;
          matrix_t modelView = *(matrix_t*)matrix * *(matrix_t*)view;
-         ES2UNUSED(modelView);
+         IM_UNUSED(modelView);
 
          for (int iFace = 0; iFace < 6; iFace++)
          {
@@ -2359,6 +2369,10 @@ namespace ImGuizmo
       static int interpolationFrames = 0;
       const vec_t referenceUp = makeVect(0.f, 1.f, 0.f);
 
+      matrix_t svgView, svgProjection;
+      svgView = gContext.mViewMat;
+      svgProjection = gContext.mProjectionMat;
+
       ImGuiIO& io = ImGui::GetIO();
       gContext.mDrawList->AddRectFilled(position, position + size, backgroundColor);
       matrix_t viewInverse;
@@ -2411,7 +2425,7 @@ namespace ImGuizmo
                                           directionUnary[normalIndex] + directionUnary[perpXIndex] - directionUnary[perpYIndex],
                                           directionUnary[normalIndex] - directionUnary[perpXIndex] - directionUnary[perpYIndex],
                                           directionUnary[normalIndex] - directionUnary[perpXIndex] + directionUnary[perpYIndex] };
-            ES2UNUSED(faceCoords);
+            IM_UNUSED(faceCoords);
             // plan local space
             const vec_t n = directionUnary[normalIndex] * invert;
             vec_t viewSpaceNormal = n;
@@ -2563,5 +2577,8 @@ namespace ImGuizmo
          vec_t newEye = camTarget + newDir * length;
          LookAt(&newEye.x, &camTarget.x, &referenceUp.x, view);
       }
+
+      // restore view/projection because it was used to compute ray
+      ComputeContext(svgView.m16, svgProjection.m16, gContext.mModelSource.m16, gContext.mMode);
    }
 };
