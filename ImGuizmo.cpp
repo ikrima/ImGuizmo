@@ -238,7 +238,7 @@ namespace ImGuizmo
       bool operator!=(const vec_t& other) const { return memcmp(this, &other, sizeof(vec_t)); }
    };
 
-   vec_t makeVect(float _x, float _y, float _z = 0.f, float _w = 0.f) { vec_t res; res.x = _x; res.y = _y; res.z = _z; res.w = _w; return res; }
+   constexpr vec_t makeVect(float _x, float _y, float _z = 0.f, float _w = 0.f) { return vec_t{_x,_y,_z,_w}; }
    vec_t makeVect(ImVec2 v) { vec_t res; res.x = v.x; res.y = v.y; res.z = 0.f; res.w = 0.f; return res; }
    vec_t vec_t::operator * (float f) const { return makeVect(x * f, y * f, z * f, w * f); }
    vec_t vec_t::operator - () const { return makeVect(-x, -y, -z, -w); }
@@ -677,14 +677,15 @@ namespace ImGuizmo
       int mEditingID = -1;
       OPERATION mOperation = OPERATION(-1);
    };
-
+   ES2WRN_DISABLE_CLANG("-Wglobal-constructors")
    static Context gContext;
+   ES2WRN_RESTORE_CLANG()
 
    //static constexpr float angleLimit = 0.96f;
    //static constexpr float planeLimit = 0.2f;
 
-   static const vec_t directionUnary[3] = { makeVect(1.f, 0.f, 0.f), makeVect(0.f, 1.f, 0.f), makeVect(0.f, 0.f, 1.f) };
-   static const ImU32 directionColor[3] = { 0xFF0000AA, 0xFF00AA00, 0xFFAA0000 };
+   static constexpr vec_t directionUnary[3] = { makeVect(1.f, 0.f, 0.f), makeVect(0.f, 1.f, 0.f), makeVect(0.f, 0.f, 1.f) };
+   static constexpr ImU32 directionColor[3] = { 0xFF0000AA, 0xFF00AA00, 0xFFAA0000 };
 
    // Alpha: 100%: FF, 87%: DE, 70%: B3, 54%: 8A, 50%: 80, 38%: 61, 12%: 1F
    static const ImU32 planeColor[3] = { 0x610000AA, 0x6100AA00, 0x61AA0000 };
