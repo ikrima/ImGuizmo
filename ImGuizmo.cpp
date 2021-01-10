@@ -26,7 +26,7 @@
 #endif
 #include "imgui_internal.h"
 #include "ImGuizmo.h"
-#if !defined(_WIN32) 
+#if !defined(_WIN32)
 #define _malloca(x) alloca(x)
 #else
 #include <malloc.h>
@@ -679,9 +679,9 @@ namespace ImGuizmo
       int mEditingID = -1;
       OPERATION mOperation = OPERATION(-1);
    };
-   ES2WRN_DISABLE_CLANG("-Wglobal-constructors")
+   ES2WRN_DISABLE(CLANG,"-Wglobal-constructors")
    static Context gContext;
-   ES2WRN_RESTORE_CLANG()
+   ES2WRN_RESTORE(CLANG)
 
    static constexpr vec_t directionUnary[3] = { makeVect(1.f, 0.f, 0.f), makeVect(0.f, 1.f, 0.f), makeVect(0.f, 0.f, 1.f) };
    static constexpr ImU32 directionColor[3] = { 0xFF0000AA, 0xFF00AA00, 0xFFAA0000 };
@@ -854,7 +854,7 @@ namespace ImGuizmo
       gContext.mDrawList = drawlist ? drawlist : ImGui::GetWindowDrawList();
    }
 
-   void SetImGuiContext(ImGuiContext* ctx) 
+   void SetImGuiContext(ImGuiContext* ctx)
    {
       ImGui::SetCurrentContext(ctx);
    }
@@ -951,7 +951,7 @@ namespace ImGuizmo
       projectionInverse.Inverse(gContext.mViewProjection);
       far.Transform(makeVect(0, 0, 10.f, 1.f), projectionInverse);
       gContext.mReversed = (far.z/far.w) < 0.f;
-      
+
       // compute scale from the size of camera right vector projected on screen at the matrix position
       vec_t pointRight = viewInverse.v.right;
       pointRight.TransformPoint(gContext.mViewProjection);
