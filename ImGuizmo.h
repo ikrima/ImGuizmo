@@ -163,7 +163,7 @@ namespace ImGuizmo
    // Needs view and projection matrices. 
    // matrix parameter is the source matrix (where will be gizmo be drawn) and might be transformed by the function. Return deltaMatrix is optional
    // translation is applied in world space
-   enum OPERATION
+   enum OPERATION : int
    {
       TRANSLATE_X      = (1u << 0),
       TRANSLATE_Y      = (1u << 1),

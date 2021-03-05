@@ -43,28 +43,28 @@ namespace ImGuizmo
    static float gGizmoSizeClipSpace = 0.1f;
    const float screenRotateSize = 0.06f;
 
-   static OPERATION operator&(OPERATION lhs, OPERATION rhs)
+   static constexpr OPERATION operator&(OPERATION lhs, OPERATION rhs)
    {
      return static_cast<OPERATION>(static_cast<int>(lhs) & static_cast<int>(rhs));
    }
 
-   static bool operator!=(OPERATION lhs, int rhs)
+   static constexpr bool operator!=(OPERATION lhs, int rhs)
    {
      return static_cast<int>(lhs) != rhs;
    }
 
-   static bool operator==(OPERATION lhs, int rhs)
+   static constexpr bool operator==(OPERATION lhs, int rhs)
    {
      return static_cast<int>(lhs) == rhs;
    }
 
-   static bool Intersects(OPERATION lhs, OPERATION rhs)
+   static constexpr bool Intersects(OPERATION lhs, OPERATION rhs)
    {
      return (lhs & rhs) != 0;
    }
 
    // True if lhs contains rhs
-   static bool Contains(OPERATION lhs, OPERATION rhs)
+   static constexpr bool Contains(OPERATION lhs, OPERATION rhs)
    {
      return (lhs & rhs) == rhs;
    }
@@ -1199,11 +1199,11 @@ namespace ImGuizmo
          {
             continue;
          }
-         ImVec2 circlePos[circleMul * halfCircleSegmentCount + 1];
+         ImVec2* circlePos = (ImVec2*) alloca(sizeof(ImVec2) * (circleMul * halfCircleSegmentCount + 1));
 
          float angleStart = atan2f(cameraToModelNormalized[(4 - axis) % 3], cameraToModelNormalized[(3 - axis) % 3]) + ZPI * 0.5f;
 
-         for (unsigned int i = 0; i < circleMul * halfCircleSegmentCount + 1; i++)
+         for (int i = 0; i < circleMul * halfCircleSegmentCount + 1; i++)
          {
             float ng = angleStart + circleMul * ZPI * ((float)i / (float)halfCircleSegmentCount);
             vec_t axisPos = makeVect(cosf(ng), sinf(ng), 0.f);
