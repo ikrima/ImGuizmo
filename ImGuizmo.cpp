@@ -32,6 +32,9 @@
 #include <malloc.h>
 #endif
 
+
+ES2WRN_DISABLE(CLANG,"-Wdouble-promotion")
+
 // includes patches for multiview from
 // https://github.com/CedricGuillemet/ImGuizmo/issues/15
 
@@ -2713,3 +2716,5 @@ namespace ImGuizmo
       ComputeContext(svgView.m16, svgProjection.m16, gContext.mModelSource.m16, gContext.mMode);
    }
 };
+
+ES2WRN_RESTORE(CLANG)
