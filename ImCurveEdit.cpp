@@ -93,11 +93,11 @@ namespace ImCurveEdit
             ret = 2;
       }
       if (edited)
-         draw_list->AddPolyline(offsets, 4, 0xFFFFFFFF, true, 3.0f);
+         draw_list->AddPolyline(offsets, 4, 0xFFFFFFFF, ImDrawFlags_Closed , 3.0f);
       else if (ret)
-         draw_list->AddPolyline(offsets, 4, 0xFF80B0FF, true, 2.0f);
+         draw_list->AddPolyline(offsets, 4, 0xFF80B0FF, ImDrawFlags_Closed , 2.0f);
       else
-         draw_list->AddPolyline(offsets, 4, 0xFF0080FF, true, 2.0f);
+         draw_list->AddPolyline(offsets, 4, 0xFF0080FF, ImDrawFlags_Closed , 2.0f);
 
       return ret;
    }
