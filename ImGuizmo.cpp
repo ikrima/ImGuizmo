@@ -33,7 +33,7 @@
 #endif
 
 
-ES2WRN_DISABLE(CLANG,"-Wdouble-promotion")
+ES2WRN_DISABLE(CLANG,double-promotion)
 
 // includes patches for multiview from
 // https://github.com/CedricGuillemet/ImGuizmo/issues/15
@@ -728,7 +728,7 @@ namespace ImGuizmo
 
       bool mAllowAxisFlip = true;
    };
-   ES2WRN_DISABLE(CLANG,"-Wglobal-constructors")
+   ES2WRN_DISABLE(CLANG,global-constructors)
    static Context gContext;
    ES2WRN_RESTORE(CLANG)
 
